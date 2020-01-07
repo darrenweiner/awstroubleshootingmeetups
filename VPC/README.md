@@ -1,3 +1,5 @@
 VPC Troubleshooting Meetup
 
-To launch in us-west-2, [use this link directly](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=vpc-meetup-benchmark&templateURL=https://github.com/darrenweiner/awstroubleshootingmeetups/blob/master/VPC/CloudFormation/vpc_subnets_create_meetup-benchmark.yaml)
+Launch links:
+Benchmark VPC:
+us-west-2: [https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png.](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=vpc-meetup-benchmark&templateURL=https://github.com/darrenweiner/awstroubleshootingmeetups/blob/master/VPC/CloudFormation/vpc_subnets_create_meetup-benchmark.yaml)
