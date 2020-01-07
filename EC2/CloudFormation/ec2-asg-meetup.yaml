@@ -1,0 +1,254 @@
+Resources:
+  EC2SecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Security group for ec2 test
+      VpcId:
+        Fn::ImportValue:
+          !Sub "${vpcStack}:vpcId"
+      Tags:
+        - Key: Name
+          Value: !Sub '${org}-${environment}'
+        - Key: environment
+          Value: !Ref environment
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          SourceSecurityGroupId: !Ref ALBSecurityGroup
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          SourceSecurityGroupId: !Ref ALBSecurityGroup
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: 0.0.0.0/0
+  IamInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref EC2Role
+  EC2Role:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+              - ec2.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Description: Role for IAM Profile
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+      RoleName: Meetup-EC2Role
+  LaunchTemplate:
+    Type: 'AWS::EC2::LaunchTemplate'
+    Properties:
+      LaunchTemplateName: amazonlinux2
+      LaunchTemplateData:
+        IamInstanceProfile:
+          Arn: !GetAtt IamInstanceProfile.Arn
+        UserData: IyEvYmluL2Jhc2gKc3VkbyB5dW0gaW5zdGFsbCAteSBodHRwZCAKc3VkbyBzeXN0ZW1jdGwgc3RhcnQgaHR0cGQKc3VkbyBzeXN0ZW1jdGwgZW5hYmxlIGh0dHBk
+        TagSpecifications:
+          - ResourceType: instance
+            Tags:
+              - Key: org
+                Value: !Ref org
+              - Key: environment
+                Value: !Ref environment
+        InstanceInitiatedShutdownBehavior: stop
+        SecurityGroupIds:
+          - !Ref EC2SecurityGroup
+        EbsOptimized: !Ref EbsOptimized
+        DisableApiTermination: False
+        ImageId: !Ref amiid
+        InstanceType: !Ref InstanceType
+        Monitoring: !Ref "AWS::NoValue"
+        CreditSpecification: !Ref "AWS::NoValue"
+  AutoscalingGroup:
+    Type: 'AWS::AutoScaling::AutoScalingGroup'
+    Properties:
+      AutoScalingGroupName: !Sub 'ASG-${org}-${environment}'
+      Cooldown: !Ref 'AWS::NoValue'
+      DesiredCapacity: !Ref DesiredCapacity
+      HealthCheckGracePeriod: !Ref HealthCheckGracePeriod
+      HealthCheckType: 'ELB'
+      LaunchTemplate:
+        LaunchTemplateId: !Ref LaunchTemplate
+        Version: !Ref LaunchTemplateVersion
+      MaxSize: !Ref MaxSize
+      MetricsCollection:
+        - !Ref 'AWS::NoValue'
+      MinSize: !Ref MinSize
+      Tags:
+        - Key: Name
+          Value: !Sub '${org}-${environment}'
+          PropagateAtLaunch: True
+        - Key: environment
+          Value: !Ref environment
+          PropagateAtLaunch: True
+        - Key: org
+          Value: !Ref org
+          PropagateAtLaunch: True
+      TargetGroupARNs:
+        - !Ref TargetGroup1
+      TerminationPolicies:
+        - OldestInstance
+      VPCZoneIdentifier:
+        - Fn::ImportValue:
+            !Sub "${vpcStack}:subnet1Private"
+        - Fn::ImportValue:
+            !Sub "${vpcStack}:subnet2Private"
+        - Fn::ImportValue:
+            !Sub "${vpcStack}:subnet3Private"
+  ElasticLoadBalancer:
+    Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+    Properties:
+      LoadBalancerAttributes:
+        - Key: routing.http2.enabled
+          Value: true
+        - Key: idle_timeout.timeout_seconds
+          Value: 600
+        - Key: deletion_protection.enabled
+          Value: false
+      Name: !Sub '${environment}-loadbalancer'
+      Scheme: !Ref loadbalancerscheme
+      SecurityGroups:
+        - !Ref ALBSecurityGroup
+      Subnets:
+        - Fn::ImportValue:
+            !Sub "${vpcStack}:subnet1Public"
+        - Fn::ImportValue:
+            !Sub "${vpcStack}:subnet2Public"
+        - Fn::ImportValue:
+            !Sub "${vpcStack}:subnet3Public"
+      Tags:
+        - Key: org
+          Value: !Ref org
+        - Key: environment
+          Value:  !Ref environment
+      Type: application
+      IpAddressType: ipv4
+  ALBSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Allow http and https into alb
+      VpcId:
+        Fn::ImportValue:
+          !Sub "${vpcStack}:vpcId"
+      Tags:
+        - Key: Name
+          Value: !Sub '${environment}-loadbalancer-ALBSecurityGroup'
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: 0.0.0.0/0
+  TargetGroup1:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 60
+      HealthCheckPath: /
+      HealthCheckPort: 80
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      Matcher:
+        HttpCode: 200,403
+      Name: !Sub '${environment}TargetGroup80'
+      Port: 80
+      Protocol: HTTP
+      Tags:
+        - Key: org
+          Value: !Ref org
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: 30
+      TargetType: instance
+      UnhealthyThresholdCount: 2
+      VpcId:
+        Fn::ImportValue:
+          !Sub "${vpcStack}:vpcId"
+  Listener80:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - TargetGroupArn: !Ref TargetGroup1
+          Type: forward
+      LoadBalancerArn: !Ref ElasticLoadBalancer
+      Port: 80
+      Protocol: HTTP
+Parameters:
+  org:
+    Type: 'String'
+    Default: cb
+    Description: organization
+  environment:
+    Type: String
+    Default: production
+    Description: environment
+  InstanceType:
+    Type: 'String'
+    Default: t2.micro
+    Description: instance size
+  amiid:
+    Type: String
+    Default: ami-0d8e584a484d346ae
+    Description: ami id
+  KeyPair:
+    Type: 'String'
+    Default: None
+    Description: name of keypair for ssh access
+  EbsOptimized:
+    Type: String
+    Default: false
+    Description:  Ebs Optimized?
+  vpcStack:
+    Type: String
+    Default: cloudbutton-meetup-vpc-good
+    Description:  which cf to link to
+  LaunchTemplateVersion:
+    Type: String
+    Default: 1
+    Description: Launch Template Version
+  HealthCheckGracePeriod:
+    Type: String
+    Default: 900
+    Description:  period after which to start health monitoring
+  MinSize:
+    Type: String
+    Default: 1
+    Description:  Minimum size of asg
+  MaxSize:
+    Type: String
+    Default: 1
+    Description:  Maximum size of asg
+  DesiredCapacity:
+    Type: String
+    Default: 1
+    Description: Desired Capacity size of asg
+  azCount:
+    Type: String
+    Default: 3
+    Description: choose to deploy VPC to 2 or 3 subnets
+    AllowedValues: [ "2","3" ]
+  loadbalancerscheme:
+    Type: String
+    Default: internet-facing
+    Description: internet-facing or internal
+
+

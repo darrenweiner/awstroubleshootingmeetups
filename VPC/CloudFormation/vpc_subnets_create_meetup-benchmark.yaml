@@ -2,6 +2,15 @@ AWSTemplateFormatVersion: 2010-09-09
 Conditions:
   azCount3: !Equals [ !Ref azCount, "3" ]
 Resources:
+EC2ASG:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: VpcId
+    Properties:
+      Tags:
+        - Key: org
+          Value: !Ref org
+      TemplateURL: https://cloudbutton-meetups.s3-us-west-2.amazonaws.com/EC2/CloudFormation/ec2-asg-meetup.yaml
+      TimeoutInMinutes: 15
   subnet1associationPrivate:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
