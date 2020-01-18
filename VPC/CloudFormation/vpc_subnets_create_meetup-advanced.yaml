@@ -17,39 +17,39 @@ Resources:
         Tags:
           - Key: org
             Value: !Ref org
-        TemplateURL: https://cloudbutton-meetups.s3-us-west-2.amazonaws.com/EC2/CloudFormation/ec2-asg-meetup-intermediate.yaml
+        TemplateURL: https://cloudbutton-meetups.s3-us-west-2.amazonaws.com/EC2/CloudFormation/ec2-asg-meetup-advanced.yaml
         TimeoutInMinutes: 15
   subnet1associationPrivate:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
-      RouteTableId: !Ref routetable1Public
+      RouteTableId: !Ref routetable1Private
       SubnetId: !Ref subnet1Private
   subnet2associationPrivate:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
-      RouteTableId: !Ref routetable1Public
+      RouteTableId: !Ref routetable1Private
       SubnetId: !Ref subnet2Private
   subnet3associationPrivate:
     Condition: azCount3
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
-      RouteTableId: !Ref routetable1Public
+      RouteTableId: !Ref routetable1Private
       SubnetId: !Ref subnet3Private
   subnet1associationPublic:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
-      RouteTableId: !Ref routetable1Private
+      RouteTableId: !Ref routetable1Public
       SubnetId: !Ref subnet1Public
   subnet2associationPublic:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
-      RouteTableId: !Ref routetable1Private
+      RouteTableId: !Ref routetable1Public
       SubnetId: !Ref subnet2Public
   subnet3associationPublic:
     Condition: azCount3
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
-      RouteTableId: !Ref routetable1Private
+      RouteTableId: !Ref routetable1Public
       SubnetId: !Ref subnet3Public
   route1Private:
     Type: 'AWS::EC2::Route'
@@ -179,6 +179,7 @@ Resources:
           Value: !Ref department
       VpcId: !Ref VpcId
   VPCGatewayAttach:
+    Condition: false
     Type: 'AWS::EC2::VPCGatewayAttachment'
     Properties:
       InternetGatewayId: !Ref InternetGateway
@@ -213,8 +214,8 @@ Resources:
         Ref: Nacl1
       RuleNumber: '100'
       Protocol: "-1"
-      RuleAction: allow
-      Egress: 'false'
+      RuleAction: deny
+      Egress: 'true'
       CidrBlock: 0.0.0.0/0
       PortRange:
         From: '0'
@@ -262,7 +263,7 @@ Resources:
 Parameters:
   vpccidr:
     Type: String
-    Default: 10.110.0.0/16
+    Default: 10.112.0.0/16
     Description: vpc cidr
   org:
     Type: String

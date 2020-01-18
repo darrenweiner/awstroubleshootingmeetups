@@ -52,7 +52,7 @@ Resources:
       LaunchTemplateData:
         IamInstanceProfile:
           Arn: !GetAtt IamInstanceProfile.Arn
-        UserData: IyEvYmluL2Jhc2gKc3VkbyB5dW0gaW5zdGFsbCAteSBodHRwZCAKI3N1ZG8gc3lzdGVtY3RsIHN0YXJ0IGh0dHBkCiNzdWRvIHN5c3RlbWN0bCBlbmFibGUgaHR0cGQKI1Rha2UgdGhlIHJlZCBwaWxsLCBuZW8=
+        UserData: IyEvYmluL2Jhc2gKc3VkbyB5dW0gaW5zdGFsbCAteSBodHRwZCAKc3VkbyBzeXN0ZW1jdGwgc3RhcnQgaHR0cGQKc3VkbyBzeXN0ZW1jdGwgZW5hYmxlIGh0dHBk
         TagSpecifications:
           - ResourceType: instance
             Tags:
@@ -222,7 +222,7 @@ Parameters:
     Description:  period after which to start health monitoring
   MinSize:
     Type: String
-    Default: 0
+    Default: 1
     Description:  Minimum size of asg
   MaxSize:
     Type: String
@@ -230,7 +230,7 @@ Parameters:
     Description:  Maximum size of asg
   DesiredCapacity:
     Type: String
-    Default: 0
+    Default: 1
     Description: Desired Capacity size of asg
   azCount:
     Type: String
