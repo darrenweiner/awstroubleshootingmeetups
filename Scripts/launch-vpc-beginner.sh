@@ -1,9 +1,9 @@
 region=us-west-2
 profile=CloudButton_Admin
 
-stackname=vpc-meetup-benchmark
+stackname=vpc-meetup-beginner
 pathname=/Users/darrenweiner/cloudbutton/Meetups/VPC/CloudFormation/
-templatename=vpc_subnets_create_meetup-benchmark.yaml
+templatename=vpc_subnets_create_meetup-beginner.yaml
 
 
 if [[ $1 == 'D' ]]; then #delete to accelerate iterating

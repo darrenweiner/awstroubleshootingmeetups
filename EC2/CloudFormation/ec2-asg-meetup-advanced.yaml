@@ -222,7 +222,7 @@ Parameters:
     Description:  period after which to start health monitoring
   MinSize:
     Type: String
-    Default: 1
+    Default: 0
     Description:  Minimum size of asg
   MaxSize:
     Type: String
@@ -230,7 +230,7 @@ Parameters:
     Description:  Maximum size of asg
   DesiredCapacity:
     Type: String
-    Default: 1
+    Default: 0
     Description: Desired Capacity size of asg
   azCount:
     Type: String
