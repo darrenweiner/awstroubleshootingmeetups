@@ -132,7 +132,7 @@ Resources:
     Properties:
       GroupDescription: Allow http and https into alb
       VpcId:
-        !Ref vpcId
+        !Ref vpcid
       Tags:
         - Key: Name
           Value: !Sub '${environment}-loadbalancer-ALBSecurityGroup'

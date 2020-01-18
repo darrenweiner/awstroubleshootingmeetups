@@ -22,34 +22,34 @@ Resources:
   subnet1associationPrivate:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
-      RouteTableId: !Ref routetable1Private
+      RouteTableId: !Ref routetable1Public
       SubnetId: !Ref subnet1Private
   subnet2associationPrivate:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
-      RouteTableId: !Ref routetable1Private
+      RouteTableId: !Ref routetable1Public
       SubnetId: !Ref subnet2Private
   subnet3associationPrivate:
     Condition: azCount3
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
-      RouteTableId: !Ref routetable1Private
+      RouteTableId: !Ref routetable1Public
       SubnetId: !Ref subnet3Private
   subnet1associationPublic:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
-      RouteTableId: !Ref routetable1Public
+      RouteTableId: !Ref routetable1Private
       SubnetId: !Ref subnet1Public
   subnet2associationPublic:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
-      RouteTableId: !Ref routetable1Public
+      RouteTableId: !Ref routetable1Private
       SubnetId: !Ref subnet2Public
   subnet3associationPublic:
     Condition: azCount3
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
-      RouteTableId: !Ref routetable1Public
+      RouteTableId: !Ref routetable1Private
       SubnetId: !Ref subnet3Public
   route1Private:
     Type: 'AWS::EC2::Route'
@@ -214,7 +214,7 @@ Resources:
       RuleNumber: '100'
       Protocol: "-1"
       RuleAction: allow
-      Egress: 'true'
+      Egress: 'false'
       CidrBlock: 0.0.0.0/0
       PortRange:
         From: '0'

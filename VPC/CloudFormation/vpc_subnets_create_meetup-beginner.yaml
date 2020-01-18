@@ -17,7 +17,7 @@ Resources:
         Tags:
           - Key: org
             Value: !Ref org
-        TemplateURL: https://cloudbutton-meetups.s3-us-west-2.amazonaws.com/EC2/CloudFormation/ec2-asg-meetup.yaml
+        TemplateURL: https://cloudbutton-meetups.s3-us-west-2.amazonaws.com/EC2/CloudFormation/ec2-asg-meetup-beginner.yaml
         TimeoutInMinutes: 15
   subnet1associationPrivate:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
@@ -51,12 +51,6 @@ Resources:
     Properties:
       RouteTableId: !Ref routetable1Public
       SubnetId: !Ref subnet3Public
-  route1Private:
-    Type: 'AWS::EC2::Route'
-    Properties:
-      RouteTableId: !Ref routetable1Private
-      DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: !Ref NatGateway1
   route1Public:
     Type: 'AWS::EC2::Route'
     Properties:
@@ -262,7 +256,7 @@ Resources:
 Parameters:
   vpccidr:
     Type: String
-    Default: 10.110.0.0/16
+    Default: 10.111.0.0/16
     Description: vpc cidr
   org:
     Type: String

@@ -76,7 +76,7 @@ Resources:
       Cooldown: !Ref 'AWS::NoValue'
       DesiredCapacity: !Ref DesiredCapacity
       HealthCheckGracePeriod: !Ref HealthCheckGracePeriod
-      HealthCheckType: 'ELB'
+      HealthCheckType: 'EC2'
       LaunchTemplate:
         LaunchTemplateId: !Ref LaunchTemplate
         Version: !Ref LaunchTemplateVersion
@@ -132,7 +132,7 @@ Resources:
     Properties:
       GroupDescription: Allow http and https into alb
       VpcId:
-        !Ref vpcId
+        !Ref vpcid
       Tags:
         - Key: Name
           Value: !Sub '${environment}-loadbalancer-ALBSecurityGroup'
