@@ -19,7 +19,7 @@ us-west-2
 
 
 Reference Architecture (Mostly complete)
-|Advanced| [![Launch Benchmark](https://cloudbutton-meetups.s3-us-west-2.amazonaws.com/RefArch/RefArch-VPCMeetup.jpeg)]|
+![Reference Architecture](https://cloudbutton-meetups.s3-us-west-2.amazonaws.com/RefArch/RefArch-VPCMeetup.jpeg)
 
 
 FAQS:
