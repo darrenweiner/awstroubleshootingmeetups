@@ -6,7 +6,7 @@ Resources:
       Type: AWS::CloudFormation::Stack
       Properties:
         Parameters:
-          vpcStack: !Sub '${AWS::StackName}'
+          vpcStack: !Ref vpcStack
           vpcid: !Ref VpcId
           subnet1Public: !Ref subnet1Public
           subnet2Public: !Ref subnet2Public
@@ -260,6 +260,10 @@ Resources:
     Properties:
       Domain: vpc
 Parameters:
+  vpcStack:
+    Type: String
+    Default: bench
+    Description: meetup level
   vpccidr:
     Type: String
     Default: 10.110.0.0/16

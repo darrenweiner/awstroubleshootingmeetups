@@ -7,7 +7,7 @@ Resources:
         !Ref vpcid
       Tags:
         - Key: Name
-          Value: !Sub '${org}-${environment}'
+          Value: !Sub '${org}-${environment}-${vpcStack}'
         - Key: environment
           Value: !Ref environment
       SecurityGroupIngress:
@@ -44,11 +44,14 @@ Resources:
       Description: Role for IAM Profile
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
-      RoleName: Meetup-EC2Role
+      RoleName: !Join
+        - '-'
+        - - 'Meetup-EC2Role'
+          - !Ref vpcStack
   LaunchTemplate:
     Type: 'AWS::EC2::LaunchTemplate'
     Properties:
-      LaunchTemplateName: amazonlinux2
+      LaunchTemplateName: !Sub 'amazonlinux2-${vpcStack}'
       LaunchTemplateData:
         IamInstanceProfile:
           Arn: !GetAtt IamInstanceProfile.Arn
@@ -72,7 +75,7 @@ Resources:
   AutoscalingGroup:
     Type: 'AWS::AutoScaling::AutoScalingGroup'
     Properties:
-      AutoScalingGroupName: !Sub 'ASG-${org}-${environment}'
+      AutoScalingGroupName: !Sub 'ASG-${org}-${environment}-${vpcStack}'
       Cooldown: !Ref 'AWS::NoValue'
       DesiredCapacity: !Ref DesiredCapacity
       HealthCheckGracePeriod: !Ref HealthCheckGracePeriod
@@ -112,7 +115,7 @@ Resources:
           Value: 600
         - Key: deletion_protection.enabled
           Value: false
-      Name: !Sub '${environment}-loadbalancer'
+      Name: !Sub '${environment}-${vpcStack}-loadbalancer'
       Scheme: !Ref loadbalancerscheme
       SecurityGroups:
         - !Ref ALBSecurityGroup
@@ -135,7 +138,7 @@ Resources:
         !Ref vpcid
       Tags:
         - Key: Name
-          Value: !Sub '${environment}-loadbalancer-ALBSecurityGroup'
+          Value: !Sub '${environment}-${vpcStack}-ALBSG'
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 80
@@ -161,7 +164,10 @@ Resources:
       HealthyThresholdCount: 2
       Matcher:
         HttpCode: 200,403
-      Name: !Sub '${environment}TargetGroup80'
+      Name: !Join
+        - '-'
+        - - !Sub '${environment}TargetGroup80'
+          - !Ref vpcStack
       Port: 80
       Protocol: HTTP
       Tags:
@@ -210,7 +216,7 @@ Parameters:
     Description:  Ebs Optimized?
   vpcStack:
     Type: String
-    Default: vpc-meetup-benchmark
+    Default: bench
     Description:  which cf to link to
   LaunchTemplateVersion:
     Type: String
