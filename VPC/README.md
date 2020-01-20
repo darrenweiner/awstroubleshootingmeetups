@@ -1,12 +1,8 @@
-VPC Troubleshooting Meetup
+VPC Troubleshooting Meetup  
 
-Launch links: 
-
-Benchmark VPC: 
-
-WHEN LAUNCHING THESE VIA THE AWS CLOUDFORMATION CONSOLE:  
+WHEN LAUNCHING THESE VIA THE AWS CLOUDFORMATION CONSOLE USING THE BUTTONS PROVIDED BELOW:  
 Under 'Stack Creation Options', consider putting a timeout in of 12 minutes.  That will accelerate any troubleshooting if you run into problems.  
-You must check the two boxes on the last screen:  
+You must check the two boxes on the last screen before launching the stack:  
 I acknowledge that AWS CloudFormation might create IAM resources with custom names.  
 I acknowledge that AWS CloudFormation might require the following capability: CAPABILITY_AUTO_EXPAND  
 
