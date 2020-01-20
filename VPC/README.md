@@ -4,11 +4,12 @@ Launch links:
 
 Benchmark VPC: 
 
-WHEN LAUNCHING THESE VIA THE AWS CLOUDFORMATION CONSOLE, you must check the two boxes on the last screen:
-I acknowledge that AWS CloudFormation might create IAM resources with custom names.
+WHEN LAUNCHING THESE VIA THE AWS CLOUDFORMATION CONSOLE:  
+Under 'Stack Creation Options', consider putting a timeout in of 12 minutes.  That will accelerate any troubleshooting if you run into problems.  
+You must check the two boxes on the last screen:  
+I acknowledge that AWS CloudFormation might create IAM resources with custom names.  
+I acknowledge that AWS CloudFormation might require the following capability: CAPABILITY_AUTO_EXPAND  
 
-I acknowledge that AWS CloudFormation might require the following capability: CAPABILITY_AUTO_EXPAND
-us-west-2 
 
 |Module          | QuickLaunch |
 |----------------|--------------|
@@ -19,16 +20,18 @@ us-west-2
 
 
 Reference Architecture (Mostly complete)
+
 ![Reference Architecture](https://cloudbutton-meetups.s3-us-west-2.amazonaws.com/RefArch/RefArch-VPCMeetup.jpeg)
 
 
 FAQS:
+When I launch the stack, do the parameters matter?  
+No. To ensure a smooth launch, do not modify the default parameters.  That will not impact the troubleshooting process
 
-Can I view the template code?
+Can I view the template code?  
 Sure.  You can view in CF Designer or an IDE/Text Editor...whatever you want.
 
-Can I diff different templates?
-
+Can I diff different templates?  
 No.  That's cheating.  Don't do that. To get the most out of these exercises, you should treat each template as a separate exercise.
 
 
