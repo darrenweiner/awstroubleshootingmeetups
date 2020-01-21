@@ -42,13 +42,13 @@ You could, but it will be more challenging and more 'real-world' troubleshooting
 Can I diff different templates?  
 No.  Again...cheating.  Don't do that. To get the most out of this workshop, you should treat each template as a separate exercise.
 
-Cam I launch more than one stack at a time?  
+Can I launch more than one stack at a time?  
 Yes.  The templates are configured so you can launch all of them at once.  Although I suggest doing one at a time.
 
 If I figure out the beginner module, will that make it easier to figure out the intermediate or advanced ones?  
 Probably not.  Each module is designed with different variations of incorrect or wrong configuration.
 
-How do I delete the stacks?
+How do I delete the stacks?  
 For most of the modules, when you delete the cloudformation stack, it will cleanly delete all the resources.  However, likely one of them will need some manual follow up.  
-Instructions for this will follow at the end of the workshop.
+Instructions for this will follow at the end of the workshop.  Plan for some mop-up.
 
