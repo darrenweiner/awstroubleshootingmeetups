@@ -1,5 +1,14 @@
 VPC Troubleshooting Meetup  
 
+Your goal is to successfully demonstrate the following:  
+* That you can ssh into the launched EC2 instance.
+* That the apache test website is available to the outside world.
+
+What you need to do:  
+* Launch either the beginner, intermediate, or advanced stack below. 
+* Once the stack is launched with all associated resources, begin troubleshooting and make whatever changes are needed to the resources to achieve the above goals.
+
+Notes:  
 WHEN LAUNCHING THESE VIA THE AWS CLOUDFORMATION CONSOLE USING THE BUTTONS PROVIDED BELOW:  
 Under 'Stack Creation Options', consider putting a timeout in of 12 minutes.  That will accelerate any troubleshooting if you run into problems.  
 You must check the two boxes on the last screen before launching the stack:  
@@ -20,15 +29,26 @@ Reference Architecture (Mostly complete)
 ![Reference Architecture](https://cloudbutton-meetups.s3-us-west-2.amazonaws.com/RefArch/RefArch-VPCMeetup.jpeg)
 
 
-FAQS:
+FAQS:  
+Should I launch the benchmark stack?  
+No.  This is the 'correct' answer and is here as a reference.  But do not launch this one.
+
 When I launch the stack, do the parameters matter?  
 No. To ensure a smooth launch, do not modify the default parameters.  That will not impact the troubleshooting process
 
 Can I view the template code?  
-Sure.  You can view in CF Designer or an IDE/Text Editor...whatever you want.
+You could, but it will be more challenging and more 'real-world' troubleshooting if you dive into the environment to troubleshoot.  It's up to you.
 
 Can I diff different templates?  
-No.  That's cheating.  Don't do that. To get the most out of these exercises, you should treat each template as a separate exercise.
+No.  That's cheating.  Don't do that. To get the most out of this workshop, you should treat each template as a separate exercise.
 
+Cam I launch more than one stack at a time?  
+Yes.  The templates are configured so you can launch all of them at once.  Although I suggest doing one at a time.
 
+If I figure out the beginner module, will that make it easier to figure out the intermediate or advanced ones?  
+Probably not.  Each module is designed with different variations of incorrect or wrong configuration.
+
+How do I delete the stacks?
+For most of the modules, when you delete the cloudformation stack, it will cleanly delete all the resources.  However, likely one of them will need some manual follow up.  
+Instructions for this will follow at the end of the workshop.
 
