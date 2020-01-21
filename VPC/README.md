@@ -31,7 +31,7 @@ Reference Architecture (Mostly complete)
 
 FAQS:  
 Should I launch the benchmark stack?  
-No.  This is the 'correct' answer and is here as a reference.  But do not launch this one.
+No.  This is the 'correct' answer and is here as a reference.  But do not launch this one.  That's cheating.
 
 When I launch the stack, do the parameters matter?  
 No. To ensure a smooth launch, do not modify the default parameters.  That will not impact the troubleshooting process
@@ -40,7 +40,7 @@ Can I view the template code?
 You could, but it will be more challenging and more 'real-world' troubleshooting if you dive into the environment to troubleshoot.  It's up to you.
 
 Can I diff different templates?  
-No.  That's cheating.  Don't do that. To get the most out of this workshop, you should treat each template as a separate exercise.
+No.  Again...cheating.  Don't do that. To get the most out of this workshop, you should treat each template as a separate exercise.
 
 Cam I launch more than one stack at a time?  
 Yes.  The templates are configured so you can launch all of them at once.  Although I suggest doing one at a time.
