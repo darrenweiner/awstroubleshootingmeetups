@@ -99,7 +99,7 @@ Resources:
         - Key: department
           Value: !Ref department
         - Key: Name
-          Value: !Sub '${department}-us-west-2a-private'
+          Value: !Sub '${department}-us-west-2a-private-${vpcStack}'
         - Key: CostTag
           Value: !Ref department
       VpcId: !Ref VpcId
@@ -112,7 +112,7 @@ Resources:
       CidrBlock: !Select [ 1, !Cidr [ !GetAtt VpcId.CidrBlock, 6, 8 ]]
       Tags:
         - Key: Name
-          Value: !Sub '${department}-us-west-2b-private'
+          Value: !Sub '${department}-us-west-2b-private-${vpcStack}'
         - Key: CostTag
           Value: !Ref department
       VpcId: !Ref VpcId
@@ -128,7 +128,7 @@ Resources:
         - Key: department
           Value: !Ref department
         - Key: Name
-          Value: !Sub '${department}-us-west-2c-private'
+          Value: !Sub '${department}-us-west-2c-private-${vpcStack}'
         - Key: CostTag
           Value: !Ref department
       VpcId: !Ref VpcId
@@ -143,7 +143,7 @@ Resources:
         - Key: department
           Value: !Ref department
         - Key: Name
-          Value: !Sub '${department}-us-west-2a-public'
+          Value: !Sub '${department}-us-west-2a-public-${vpcStack}'
         - Key: CostTag
           Value: !Ref department
       VpcId: !Ref VpcId
@@ -158,7 +158,7 @@ Resources:
         - Key: department
           Value: !Ref department
         - Key: Name
-          Value: !Sub '${department}-us-west-2b-public'
+          Value: !Sub '${department}-us-west-2b-public-${vpcStack}'
         - Key: CostTag
           Value: !Ref department
       VpcId: !Ref VpcId
@@ -174,7 +174,7 @@ Resources:
         - Key: department
           Value: !Ref department
         - Key: Name
-          Value: !Sub '${department}-us-west-2c-public'
+          Value: !Sub '${department}-us-west-2c-public-${vpcStack}'
         - Key: CostTag
           Value: !Ref department
       VpcId: !Ref VpcId
@@ -194,7 +194,7 @@ Resources:
         - Key: department
           Value: !Ref department
         - Key: Name
-          Value: !Sub '${department}-VPC'
+          Value: !Sub '${department}-VPC-${vpcStack}'
         - Key: CostTag
           Value: !Ref department
         - Key: org
