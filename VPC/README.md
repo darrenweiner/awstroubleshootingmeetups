@@ -1,8 +1,8 @@
 VPC Troubleshooting Meetup  
 
-Your goal is to successfully demonstrate the following:  
+Your goals are to successfully demonstrate the following:  
 * That you can ssh into the launched EC2 instance.
-* That the apache test website is available to the outside world.
+* That the ![apache test website](https://cloudbutton-meetups.s3-us-west-2.amazonaws.com/EC2/apache_success.png) is available to the outside world.
 
 What you need to do:  
 * Launch either the beginner, intermediate, or advanced stack below. 
