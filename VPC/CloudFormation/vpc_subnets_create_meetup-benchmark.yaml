@@ -72,7 +72,7 @@ Resources:
         - Key: department
           Value: !Ref department
         - Key: Name
-          Value: !Sub '${department}-uswest2-priv'
+          Value: !Sub '${department}-uswest2-priv-${vpcStack}'
         - Key: org
           Value: !Ref org
     Metadata:
@@ -85,7 +85,7 @@ Resources:
         !Ref VpcId
       Tags:
         - Key: Name
-          Value: !Sub '${department}-uswest2-public'
+          Value: !Sub '${department}-uswest2-public-${vpcStack}'
         - Key: org
           Value: !Ref org
   subnet1Private:
