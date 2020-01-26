@@ -260,7 +260,7 @@ Parameters:
     Description: meetup level
   vpccidr:
     Type: String
-    Default: 10.110.0.0/16
+    Default: 10.113.0.0/16
     Description: vpc cidr
   org:
     Type: String
