@@ -29,7 +29,7 @@ Reference Architecture (Mostly complete)
 ![Reference Architecture](https://cloudbutton-meetups.s3-us-west-2.amazonaws.com/RefArch/RefArch-VPCMeetup.jpeg)
 
 
-FAQS:
+FAQS:  
 What version of EC2 is being launched?  
 All modules are using Amazon Linux 2
   
