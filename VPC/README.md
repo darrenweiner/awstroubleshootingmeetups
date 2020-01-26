@@ -31,7 +31,7 @@ Reference Architecture (Mostly complete)
 
 FAQS:  
 What version of EC2 is being launched?  
-All modules are using Amazon Linux 2
+All modules are using launching a fairly recent version of the AWS provided base image of Amazon Linux 2: https://aws.amazon.com/marketplace/pp/Amazon-Web-Services-Amazon-Linux-AMI-with-Amazon-I/B077W1VR7G
   
 Should I launch the benchmark stack?  
 No.  This is the 'correct' answer and is here as a reference.  But do not launch this one.  That's cheating.
