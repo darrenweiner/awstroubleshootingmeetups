@@ -29,7 +29,10 @@ Reference Architecture (Mostly complete)
 ![Reference Architecture](https://cloudbutton-meetups.s3-us-west-2.amazonaws.com/RefArch/RefArch-VPCMeetup.jpeg)
 
 
-FAQS:  
+FAQS:
+What version of EC2 is being launched?  
+All modules are using Amazon Linux 2
+  
 Should I launch the benchmark stack?  
 No.  This is the 'correct' answer and is here as a reference.  But do not launch this one.  That's cheating.
 
