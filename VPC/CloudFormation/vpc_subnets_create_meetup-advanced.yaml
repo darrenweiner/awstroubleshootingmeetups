@@ -237,7 +237,7 @@ Resources:
     Type: AWS::EC2::SubnetNetworkAclAssociation
     Properties:
       NetworkAclId: !Ref Nacl1
-      SubnetId: !Ref subnet2Private
+      SubnetId: !Ref subnet1Private
   NACLSubnetAssociation2:
     Type: AWS::EC2::SubnetNetworkAclAssociation
     Properties:
