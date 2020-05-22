@@ -1,0 +1,164 @@
+AWSTemplateFormatVersion: 2010-09-09
+Resources:
+  EC2Infrastructure:
+      Type: AWS::CloudFormation::Stack
+      Properties:
+        Parameters:
+          org: !Ref org
+          environment: !Ref environment
+          level: !Ref level
+          vpcStack: !Ref vpcStack
+          vpcid: !Ref vpcid
+          subnet1Public: !Ref subnet1Public
+          subnet2Public: !Ref subnet2Public
+          subnet3Public: !Ref subnet3Public
+        Tags:
+          - Key: org
+            Value: !Ref org
+          - Key: Name
+            Value: !Sub 'meetup-${org}-${environment}-${level}-ec2'
+        TemplateURL: !Sub 'https://cloudbutton-meetups.s3-${AWS::Region}.amazonaws.com/EC2/CloudFormation/ec2-ecs-meetup-${level}.yaml'
+        TimeoutInMinutes: 15
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Sub '${environment}-${org}-${level}'
+      ClusterSettings:
+        - Name: containerInsights
+          Value: disabled
+      Tags:
+        - Key: org
+          Value: !Ref org
+        - Key: environment
+          Value: !Ref environment
+  ECSRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: !Sub '${org}-${level}-${environment}-taskrole'
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ecs-tasks.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+  ECSExecutionRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy'
+      RoleName: !Sub '${org}-${level}-${environment}-executionrole'
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ecs-tasks.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+  ECSTaskPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      Roles:
+        - !Ref ECSRole
+      PolicyName: !Sub '${org}-${level}-${environment}-taskpolicy'
+      PolicyDocument:
+        Statement:
+          - Action:
+              - s3:GetObject
+            Effect: Allow
+            Resource: !Sub 'arn:aws:sqs:*:${AWS::AccountId}:${org}-${level}-${environment}-bogus'
+  TaskDefinitionFARGATE:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      Family: !Sub '${org}-${level}-${environment}-FG'
+      Memory: !Sub '${Memory}GB'
+      Cpu: !Ref Cpu
+      ExecutionRoleArn: !GetAtt ECSExecutionRole.Arn
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      TaskRoleArn: !Ref ECSRole
+      ContainerDefinitions:
+        - Name: !Sub '${org}-${level}-${environment}-FG'
+          Image: !Sub '${ContainerImage}'
+          PortMappings:
+            - ContainerPort: !Ref ContainerPort
+          Environment:
+            - Name: environment
+              Value: !Ref environment
+  ECSServiceFARGATE:
+    Type: AWS::ECS::Service
+    Properties:
+      Cluster: !Ref ECSCluster
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 50
+      DesiredCount: 0
+      HealthCheckGracePeriodSeconds: 20
+      LaunchType: FARGATE
+      LoadBalancers:
+           -
+            ContainerName: !Sub '${org}-${level}-${environment}-FG'
+            ContainerPort: !Ref ContainerPort
+            TargetGroupArn:
+              !GetAtt EC2Infrastructure.Outputs.TargetGroupArnFARGATE
+      SchedulingStrategy: REPLICA
+      ServiceName: !Sub '${org}-${level}-${environment}-FG'
+      TaskDefinition: !Ref TaskDefinitionFARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: DISABLED
+          SecurityGroups:
+            - !GetAtt EC2Infrastructure.Outputs.SecurityGroupFG
+          Subnets:
+            - !Ref subnet1Private
+Parameters:
+  environment:
+    Type: String
+    Default: prod
+    Description:  environment for deployment
+  org:
+    Type: String
+    Default: cloudbutton
+    Description: Name of org used for naming conventions
+  level:
+    Type: String
+    Default: benchmark
+    Description: Name of level used for naming convention
+  Memory:
+    Type: String
+    Default: '0.5'
+  Cpu:
+    Type: String
+    Default: 256
+  ContainerImage:
+    Type: String
+    Default: "183105093342.dkr.ecr.us-west-2.amazonaws.com/cloudbutton/meetup-nginx-sample:latest"
+  vpcStack:
+    Type: String
+    Default: bench
+    Description:  which cf to link to
+  vpcid:
+    Type: String
+    Default: None
+  subnet1Public:
+    Type: String
+    Default: None
+  subnet2Public:
+    Type: String
+    Default: None
+  subnet3Public:
+    Type: String
+    Default: None
+  subnet1Private:
+    Type: String
+    Default: None
+  ContainerPort:
+    Type: String
+    Default: 80

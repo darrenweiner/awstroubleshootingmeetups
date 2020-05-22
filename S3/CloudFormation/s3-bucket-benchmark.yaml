@@ -1,0 +1,55 @@
+Resources:
+  S3ClientBucket:
+    Type: 'AWS::S3::Bucket'
+    DeletionPolicy: Retain
+    Properties:
+      PublicAccessBlockConfiguration:
+          BlockPublicAcls: True
+          BlockPublicPolicy: True
+          IgnorePublicAcls: True
+          RestrictPublicBuckets: True
+      AccessControl: LogDeliveryWrite
+      LifecycleConfiguration:
+        Rules:
+          - Id: all Previous and Current Versions
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 7
+            NoncurrentVersionTransitions:
+              - StorageClass: GLACIER
+                TransitionInDays: 10
+            NoncurrentVersionExpirationInDays: 30
+            Status: Enabled
+            ExpirationInDays: 90
+            Transitions:
+              - StorageClass: GLACIER
+                TransitionInDays: 30
+            Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      BucketName: !Sub '${org}-${environment}-${bucketstring}-benchmark'
+      Tags:
+        - Key: environment
+          Value: !Ref environment
+        - Key: org
+          Value: !Ref org
+      VersioningConfiguration:
+        Status: Enabled
+Outputs:
+  bucketname:
+    Description: Name of bucket
+    Value: !Ref S3ClientBucket
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", !Ref bucketname ] ]
+Parameters:
+  org:
+    Type: String
+    Default: cloudbutton
+  environment:
+    Type: String
+    Default: production
+  bucketstring:
+    Type: String
+    Default: meetupartifacts
+    Description:  Core name of bucket

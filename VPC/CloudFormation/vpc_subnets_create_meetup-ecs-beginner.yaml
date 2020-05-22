@@ -2,55 +2,64 @@ AWSTemplateFormatVersion: 2010-09-09
 Conditions:
   azCount3: !Equals [ !Ref azCount, "3" ]
 Resources:
-  EC2ASG:
+  ECSClusterStack:
       Type: AWS::CloudFormation::Stack
       Properties:
         Parameters:
+          org: !Ref org
+          environment: !Ref environment
+          level: !Ref level
           vpcStack: !Ref vpcStack
           vpcid: !Ref VpcId
+          subnet1Private: !Ref subnet1Private
           subnet1Public: !Ref subnet1Public
           subnet2Public: !Ref subnet2Public
           subnet3Public: !If [ azCount3,!Ref subnet3Public, "AWS::NoValue" ]
-          subnet1Private: !Ref subnet1Private
-          subnet2Private: !Ref subnet2Private
-          subnet3Private: !If [ azCount3,!Ref subnet3Private, "AWS::NoValue" ]
         Tags:
           - Key: org
             Value: !Ref org
-        TemplateURL: https://cloudbutton-meetups.s3-us-west-2.amazonaws.com/EC2/CloudFormation/ec2-asg-meetup-intermediate.yaml
+          - Key: Name
+            Value: !Sub 'meetup-${org}-${environment}-${level}-cluster'
+        TemplateURL: !Sub 'https://cloudbutton-meetups.s3-us-west-2.amazonaws.com/ECS/CloudFormation/ecs-service-meetup-${level}.yaml'
         TimeoutInMinutes: 15
   subnet1associationPrivate:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
-      RouteTableId: !Ref routetable1Public
+      RouteTableId: !Ref routetable1Private
       SubnetId: !Ref subnet1Private
   subnet2associationPrivate:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
-      RouteTableId: !Ref routetable1Public
+      RouteTableId: !Ref routetable1Private
       SubnetId: !Ref subnet2Private
   subnet3associationPrivate:
     Condition: azCount3
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
-      RouteTableId: !Ref routetable1Public
+      RouteTableId: !Ref routetable1Private
       SubnetId: !Ref subnet3Private
   subnet1associationPublic:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
-      RouteTableId: !Ref routetable1Private
+      RouteTableId: !Ref routetable1Public
       SubnetId: !Ref subnet1Public
   subnet2associationPublic:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
-      RouteTableId: !Ref routetable1Private
+      RouteTableId: !Ref routetable1Public
       SubnetId: !Ref subnet2Public
   subnet3associationPublic:
     Condition: azCount3
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
-      RouteTableId: !Ref routetable1Private
+      RouteTableId: !Ref routetable1Public
       SubnetId: !Ref subnet3Public
+  route1Private:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      RouteTableId: !Ref routetable1Private
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway1
   route1Public:
     Type: 'AWS::EC2::Route'
     Properties:
@@ -208,7 +217,7 @@ Resources:
       RuleNumber: 100
       Protocol: -1
       RuleAction: allow
-      Egress: false
+      Egress: true
       CidrBlock: 0.0.0.0/0
       PortRange:
         From: 0
@@ -218,7 +227,7 @@ Resources:
     Properties:
       NetworkAclId:
         Ref: Nacl1
-      RuleNumber: 200
+      RuleNumber: 100
       Protocol: -1
       RuleAction: allow
       Egress: false
@@ -256,25 +265,28 @@ Resources:
 Parameters:
   vpcStack:
     Type: String
-    Default: int
+    Default: beg
     Description: meetup level
   vpccidr:
     Type: String
-    Default: 10.113.0.0/16
+    Default: 10.110.0.0/16
     Description: vpc cidr
     AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
   org:
     Type: String
     Default: cloudbutton
+  environment:
+    Type: String
+    Default: prod
   level:
     Type: String
-    Default: meetup
-    Description: level
+    Default: beginner
+    Description: level of difficulty
   azCount:
     Type: String
     Default: 3
     Description: choose to deploy VPC to 2 or 3 subnets
-    AllowedValues: [ 2,3 ]
+    AllowedValues: [ 2, 3 ]
 Outputs:
   subnet1Private:
     Description: private1 for meetup

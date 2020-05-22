@@ -1,23 +1,19 @@
 Resources:
-  EC2SecurityGroup:
+  EC2SecurityGroupFG:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
-      GroupDescription: Security group for ec2 test
+      GroupDescription: Security group for fargate test
       VpcId:
         !Ref vpcid
       Tags:
         - Key: Name
-          Value: !Sub '${org}-${environment}-${vpcStack}'
+          Value: !Sub '${org}-${environment}-${vpcStack}-FG'
         - Key: environment
           Value: !Ref environment
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 80
           ToPort: 80
-          CidrIp: 71.2.3.12/32
-        - IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
           SourceSecurityGroupId: !Ref ALBSecurityGroup
       SecurityGroupEgress:
         - IpProtocol: tcp
@@ -44,65 +40,11 @@ Resources:
       Description: Role for IAM Profile
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role
       RoleName: !Join
         - '-'
         - - 'Meetup-EC2Role'
           - !Ref vpcStack
-  LaunchTemplate:
-    Type: 'AWS::EC2::LaunchTemplate'
-    Properties:
-      LaunchTemplateName: !Sub 'amazonlinux2-${vpcStack}'
-      LaunchTemplateData:
-        IamInstanceProfile:
-          Arn: !GetAtt IamInstanceProfile.Arn
-        UserData: IyEvYmluL2Jhc2gKc3VkbyB5dW0gaW5zdGFsbCAteSBodHRwZCAKc3VkbyBzeXN0ZW1jdGwgc3RhcnQgaHR0cGQKc3VkbyBzeXN0ZW1jdGwgZW5hYmxlIGh0dHBk
-        TagSpecifications:
-          - ResourceType: instance
-            Tags:
-              - Key: org
-                Value: !Ref org
-              - Key: environment
-                Value: !Ref environment
-        InstanceInitiatedShutdownBehavior: stop
-        SecurityGroupIds:
-          - !Ref EC2SecurityGroup
-        EbsOptimized: !Ref EbsOptimized
-        DisableApiTermination: False
-        ImageId: !Ref amiid
-        InstanceType: !Ref InstanceType
-        Monitoring: !Ref "AWS::NoValue"
-        CreditSpecification: !Ref "AWS::NoValue"
-  AutoscalingGroup:
-    Type: 'AWS::AutoScaling::AutoScalingGroup'
-    Properties:
-      AutoScalingGroupName: !Sub 'ASG-${org}-${environment}-${vpcStack}'
-      Cooldown: !Ref 'AWS::NoValue'
-      DesiredCapacity: !Ref DesiredCapacity
-      HealthCheckGracePeriod: !Ref HealthCheckGracePeriod
-      HealthCheckType: 'EC2'
-      LaunchTemplate:
-        LaunchTemplateId: !Ref LaunchTemplate
-        Version: !Ref LaunchTemplateVersion
-      MaxSize: !Ref MaxSize
-      MinSize: !Ref MinSize
-      Tags:
-        - Key: Name
-          Value: !Sub '${org}-${environment}-${vpcStack}'
-          PropagateAtLaunch: True
-        - Key: environment
-          Value: !Ref environment
-          PropagateAtLaunch: True
-        - Key: org
-          Value: !Ref org
-          PropagateAtLaunch: True
-      TargetGroupARNs:
-        - !Ref TargetGroup1
-      TerminationPolicies:
-        - OldestInstance
-      VPCZoneIdentifier:
-            - !Ref subnet1Private
-            - !Ref subnet2Private
-            - !Ref subnet3Private
   ElasticLoadBalancer:
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
     Properties:
@@ -151,20 +93,20 @@ Resources:
           FromPort: 0
           ToPort: 65535
           CidrIp: 0.0.0.0/0
-  TargetGroup1:
+  TargetGroupFARGATE:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       HealthCheckIntervalSeconds: 60
       HealthCheckPath: /
-      HealthCheckPort: "80"
+      HealthCheckPort: traffic-port
       HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 2
       Matcher:
-        HttpCode: "499"
+        HttpCode: "200"
       Name: !Join
         - '-'
-        - - !Sub '${environment}TargetGroup80'
+        - - !Sub '${environment}TargetGroup80FARGATE'
           - !Ref vpcStack
       Port: 80
       Protocol: HTTP
@@ -174,7 +116,7 @@ Resources:
       TargetGroupAttributes:
         - Key: deregistration_delay.timeout_seconds
           Value: "30"
-      TargetType: instance
+      TargetType: ip
       UnhealthyThresholdCount: 2
       VpcId:
         !Ref vpcid
@@ -182,60 +124,43 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
       DefaultActions:
-        - TargetGroupArn: !Ref TargetGroup1
-          Type: forward
+        - FixedResponseConfig:
+            ContentType: text/plain
+            StatusCode: "200"
+            MessageBody: "You cannot get there from here"
+          Type: fixed-response
       LoadBalancerArn: !Ref ElasticLoadBalancer
       Port: 80
       Protocol: HTTP
+  ListenerRuleFG:
+      Type: AWS::ElasticLoadBalancingV2::ListenerRule
+      Properties:
+          ListenerArn: !Ref Listener80
+          Priority: 2
+          Conditions:
+              - Field: path-pattern
+                Values:
+                  - '/FG*'
+          Actions:
+              - TargetGroupArn: !Ref TargetGroupFARGATE
+                Type: forward
 Parameters:
   org:
     Type: 'String'
-    Default: cb
+    Default: cloudbutton
     Description: organization
   environment:
     Type: String
-    Default: production
+    Default: prod
     Description: environment
   level:
     Type: String
     Default: benchmark
-    Description: level of difficulty
-  InstanceType:
-    Type: 'String'
-    Default: t2.micro
-    Description: instance size
-  amiid:
-    Type: AWS::EC2::Image::Id
-    Default: ami-0d8e584a484d346ae
-    Description: ami id
-  EbsOptimized:
-    Type: String
-    Default: false
-    Description:  Ebs Optimized?
+    Description: Name of level used for naming convention
   vpcStack:
     Type: String
-    Default: beg
+    Default: bench
     Description:  which cf to link to
-  LaunchTemplateVersion:
-    Type: String
-    Default: 1
-    Description: Launch Template Version
-  HealthCheckGracePeriod:
-    Type: String
-    Default: 900
-    Description:  period after which to start health monitoring
-  MinSize:
-    Type: String
-    Default: 1
-    Description:  Minimum size of asg
-  MaxSize:
-    Type: String
-    Default: 1
-    Description:  Maximum size of asg
-  DesiredCapacity:
-    Type: String
-    Default: 1
-    Description: Desired Capacity size of asg
   loadbalancerscheme:
     Type: String
     Default: internet-facing
@@ -252,19 +177,27 @@ Parameters:
   subnet3Public:
     Type: String
     Default: None
-  subnet1Private:
-    Type: String
-    Default: None
-  subnet2Private:
-    Type: String
-    Default: None
-  subnet3Private:
-    Type: String
-    Default: None
 Outputs:
     ElasticLoadBalancerDNS:
       Description: Load balancer dns
       Value: !GetAtt ElasticLoadBalancer.DNSName
-
+      Export:
+        Name: !Join [ ":", [ !Ref "AWS::StackName", ElasticLoadBalancerDNS ] ]
+        Value: !GetAtt ElasticLoadBalancer.DNSName
+    FargateLink:
+      Description: link for fargate endpoint
+      Value: !Sub '${ElasticLoadBalancer.DNSName}/FG'
+    TargetGroupArnFARGATE:
+      Description: targetgroup arn
+      Value: !Ref TargetGroupFARGATE
+      Export:
+        Name: !Sub '${org}-${environment}-${level}:targetgroupfargate'
+        Value: !Ref TargetGroupFARGATE
+    SecurityGroupFG:
+      Description: security group for containers
+      Value: !Ref EC2SecurityGroupFG
+      Export:
+        Name: !Sub '${org}-${environment}-${level}:securitygroupfg'
+        Value: !Ref EC2SecurityGroupFG
 
 

@@ -1,0 +1,178 @@
+Resources:
+  EC2SecurityGroupFG:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Security group for fargate test
+      VpcId:
+        !Ref vpcid
+      Tags:
+        - Key: Name
+          Value: !Sub '${org}-${environment}-${vpcStack}-FG'
+        - Key: environment
+          Value: !Ref environment
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 666
+          ToPort: 666
+          SourceSecurityGroupId: !Ref ALBSecurityGroup
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: 0.0.0.0/0
+  ElasticLoadBalancer:
+    Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+    Properties:
+      LoadBalancerAttributes:
+        - Key: routing.http2.enabled
+          Value: "true"
+        - Key: idle_timeout.timeout_seconds
+          Value: "600"
+        - Key: deletion_protection.enabled
+          Value: "false"
+      Name: !Sub '${environment}-${vpcStack}-loadbalancer'
+      Scheme: !Ref loadbalancerscheme
+      SecurityGroups:
+        - !Ref ALBSecurityGroup
+      Subnets:
+        - !Ref subnet1Public
+        - !Ref subnet2Public
+        - !Ref subnet3Public
+      Tags:
+        - Key: org
+          Value: !Ref org
+        - Key: environment
+          Value:  !Ref environment
+      Type: application
+      IpAddressType: ipv4
+  ALBSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Allow http and https into alb
+      VpcId:
+        !Ref vpcid
+      Tags:
+        - Key: Name
+          Value: !Sub '${environment}-${vpcStack}-ALBSG'
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: 0.0.0.0/0
+  TargetGroupFARGATE:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 60
+      HealthCheckPath: /
+      HealthCheckPort: traffic-port
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      Matcher:
+        HttpCode: "200"
+      Name: !Join
+        - '-'
+        - - !Sub '${environment}TargetGroup80FARGATE'
+          - !Ref vpcStack
+      Port: 80
+      Protocol: HTTP
+      Tags:
+        - Key: org
+          Value: !Ref org
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: "30"
+      TargetType: ip
+      UnhealthyThresholdCount: 2
+      VpcId:
+        !Ref vpcid
+  Listener80:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - FixedResponseConfig:
+            ContentType: text/plain
+            StatusCode: "200"
+            MessageBody: "You cannot get there from here"
+          Type: fixed-response
+      LoadBalancerArn: !Ref ElasticLoadBalancer
+      Port: 80
+      Protocol: HTTP
+  ListenerRuleFG:
+      Type: AWS::ElasticLoadBalancingV2::ListenerRule
+      Properties:
+          ListenerArn: !Ref Listener80
+          Priority: 2
+          Conditions:
+              - Field: path-pattern
+                Values:
+                  - '/FG*'
+          Actions:
+              - TargetGroupArn: !Ref TargetGroupFARGATE
+                Type: forward
+Parameters:
+  org:
+    Type: 'String'
+    Default: cloudbutton
+    Description: organization
+  environment:
+    Type: String
+    Default: prod
+    Description: environment
+  level:
+    Type: String
+    Default: benchmark
+    Description: Name of level used for naming convention
+  vpcStack:
+    Type: String
+    Default: bench
+    Description:  which cf to link to
+  loadbalancerscheme:
+    Type: String
+    Default: internet-facing
+    Description: internet-facing or internal
+  vpcid:
+    Type: String
+    Default: None
+  subnet1Public:
+    Type: String
+    Default: None
+  subnet2Public:
+    Type: String
+    Default: None
+  subnet3Public:
+    Type: String
+    Default: None
+Outputs:
+    ElasticLoadBalancerDNS:
+      Description: Load balancer dns
+      Value: !GetAtt ElasticLoadBalancer.DNSName
+      Export:
+        Name: !Join [ ":", [ !Ref "AWS::StackName", ElasticLoadBalancerDNS ] ]
+        Value: !GetAtt ElasticLoadBalancer.DNSName
+    FargateLink:
+      Description: link for fargate endpoint
+      Value: !Sub '${ElasticLoadBalancer.DNSName}/FG'
+    TargetGroupArnFARGATE:
+      Description: targetgroup arn
+      Value: !Ref TargetGroupFARGATE
+      Export:
+        Name: !Sub '${org}-${environment}-${level}:targetgroupfargate'
+        Value: !Ref TargetGroupFARGATE
+    SecurityGroupFG:
+      Description: security group for containers
+      Value: !Ref EC2SecurityGroupFG
+      Export:
+        Name: !Sub '${org}-${environment}-${level}:securitygroupfg'
+        Value: !Ref EC2SecurityGroupFG
+
+

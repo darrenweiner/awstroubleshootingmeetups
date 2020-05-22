@@ -84,8 +84,6 @@ Resources:
         LaunchTemplateId: !Ref LaunchTemplate
         Version: !Ref LaunchTemplateVersion
       MaxSize: !Ref MaxSize
-      MetricsCollection:
-        - !Ref 'AWS::NoValue'
       MinSize: !Ref MinSize
       Tags:
         - Key: Name
@@ -110,11 +108,11 @@ Resources:
     Properties:
       LoadBalancerAttributes:
         - Key: routing.http2.enabled
-          Value: true
+          Value: "true"
         - Key: idle_timeout.timeout_seconds
-          Value: 600
+          Value: "600"
         - Key: deletion_protection.enabled
-          Value: false
+          Value: "false"
       Name: !Sub '${environment}-${vpcStack}-loadbalancer'
       Scheme: !Ref loadbalancerscheme
       SecurityGroups:
@@ -158,7 +156,7 @@ Resources:
     Properties:
       HealthCheckIntervalSeconds: 60
       HealthCheckPath: /
-      HealthCheckPort: 80
+      HealthCheckPort: "80"
       HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 2
@@ -175,7 +173,7 @@ Resources:
           Value: !Ref org
       TargetGroupAttributes:
         - Key: deregistration_delay.timeout_seconds
-          Value: 30
+          Value: "30"
       TargetType: instance
       UnhealthyThresholdCount: 2
       VpcId:
@@ -198,18 +196,18 @@ Parameters:
     Type: String
     Default: production
     Description: environment
+  level:
+    Type: String
+    Default: benchmark
+    Description: level of difficulty
   InstanceType:
     Type: 'String'
     Default: t2.micro
     Description: instance size
   amiid:
-    Type: String
+    Type: AWS::EC2::Image::Id
     Default: ami-0d8e584a484d346ae
     Description: ami id
-  KeyPair:
-    Type: 'String'
-    Default: None
-    Description: name of keypair for ssh access
   EbsOptimized:
     Type: String
     Default: false
@@ -238,11 +236,6 @@ Parameters:
     Type: String
     Default: 0
     Description: Desired Capacity size of asg
-  azCount:
-    Type: String
-    Default: 3
-    Description: choose to deploy VPC to 2 or 3 subnets
-    AllowedValues: [ "2","3" ]
   loadbalancerscheme:
     Type: String
     Default: internet-facing

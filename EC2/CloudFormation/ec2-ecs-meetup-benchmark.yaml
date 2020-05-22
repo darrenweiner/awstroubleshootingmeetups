@@ -1,5 +1,5 @@
 Resources:
-  EC2SecurityGroup:
+  EC2SecurityGroupEC2:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
       GroupDescription: Security group for ec2 test
@@ -7,17 +7,34 @@ Resources:
         !Ref vpcid
       Tags:
         - Key: Name
-          Value: !Sub '${org}-${environment}-${vpcStack}'
+          Value: !Sub '${org}-${environment}-${vpcStack}-EC2'
+        - Key: environment
+          Value: !Ref environment
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 30000
+          ToPort: 65535
+          SourceSecurityGroupId: !Ref ALBSecurityGroup
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: 0.0.0.0/0
+  EC2SecurityGroupFG:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Security group for fargate test
+      VpcId:
+        !Ref vpcid
+      Tags:
+        - Key: Name
+          Value: !Sub '${org}-${environment}-${vpcStack}-FG'
         - Key: environment
           Value: !Ref environment
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 80
           ToPort: 80
-          CidrIp: 71.2.3.12/32
-        - IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
           SourceSecurityGroupId: !Ref ALBSecurityGroup
       SecurityGroupEgress:
         - IpProtocol: tcp
@@ -44,6 +61,7 @@ Resources:
       Description: Role for IAM Profile
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role
       RoleName: !Join
         - '-'
         - - 'Meetup-EC2Role'
@@ -55,7 +73,10 @@ Resources:
       LaunchTemplateData:
         IamInstanceProfile:
           Arn: !GetAtt IamInstanceProfile.Arn
-        UserData: IyEvYmluL2Jhc2gKc3VkbyB5dW0gaW5zdGFsbCAteSBodHRwZCAKc3VkbyBzeXN0ZW1jdGwgc3RhcnQgaHR0cGQKc3VkbyBzeXN0ZW1jdGwgZW5hYmxlIGh0dHBk
+        UserData:
+          'Fn::Base64': !Sub
+            - "#!/bin/bash -xe\necho ECS_CLUSTER=${clusterName} >> /etc/ecs/ecs.config\nsudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm\nsudo systemctl enable amazon-ssm-agent"
+            - clusterName: !Ref ECSCluster
         TagSpecifications:
           - ResourceType: instance
             Tags:
@@ -65,7 +86,7 @@ Resources:
                 Value: !Ref environment
         InstanceInitiatedShutdownBehavior: stop
         SecurityGroupIds:
-          - !Ref EC2SecurityGroup
+          - !Ref EC2SecurityGroupEC2
         EbsOptimized: !Ref EbsOptimized
         DisableApiTermination: False
         ImageId: !Ref amiid
@@ -95,8 +116,6 @@ Resources:
         - Key: org
           Value: !Ref org
           PropagateAtLaunch: True
-      TargetGroupARNs:
-        - !Ref TargetGroup1
       TerminationPolicies:
         - OldestInstance
       VPCZoneIdentifier:
@@ -151,20 +170,20 @@ Resources:
           FromPort: 0
           ToPort: 65535
           CidrIp: 0.0.0.0/0
-  TargetGroup1:
+  TargetGroupEC2:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       HealthCheckIntervalSeconds: 60
       HealthCheckPath: /
-      HealthCheckPort: "80"
+      HealthCheckPort: traffic-port
       HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 2
       Matcher:
-        HttpCode: "499"
+        HttpCode: "200"
       Name: !Join
         - '-'
-        - - !Sub '${environment}TargetGroup80'
+        - - !Sub '${environment}TargetGroup80EC2'
           - !Ref vpcStack
       Port: 80
       Protocol: HTTP
@@ -178,35 +197,92 @@ Resources:
       UnhealthyThresholdCount: 2
       VpcId:
         !Ref vpcid
+  TargetGroupFARGATE:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 60
+      HealthCheckPath: /
+      HealthCheckPort: traffic-port
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      Matcher:
+        HttpCode: "200"
+      Name: !Join
+        - '-'
+        - - !Sub '${environment}TargetGroup80FARGATE'
+          - !Ref vpcStack
+      Port: 80
+      Protocol: HTTP
+      Tags:
+        - Key: org
+          Value: !Ref org
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: "30"
+      TargetType: ip
+      UnhealthyThresholdCount: 2
+      VpcId:
+        !Ref vpcid
   Listener80:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
       DefaultActions:
-        - TargetGroupArn: !Ref TargetGroup1
-          Type: forward
+        - FixedResponseConfig:
+            ContentType: text/plain
+            StatusCode: "200"
+            MessageBody: "You cannot get there from here"
+          Type: fixed-response
       LoadBalancerArn: !Ref ElasticLoadBalancer
       Port: 80
       Protocol: HTTP
+  ListenerRuleFG:
+      Type: AWS::ElasticLoadBalancingV2::ListenerRule
+      Properties:
+          ListenerArn: !Ref Listener80
+          Priority: 2
+          Conditions:
+              - Field: path-pattern
+                Values:
+                  - '/FG*'
+          Actions:
+              - TargetGroupArn: !Ref TargetGroupFARGATE
+                Type: forward
+  ListenerRuleEC2:
+      Type: AWS::ElasticLoadBalancingV2::ListenerRule
+      Properties:
+          ListenerArn: !Ref Listener80
+          Priority: 3
+          Conditions:
+              - Field: path-pattern
+                Values:
+                  - '/EC2*'
+          Actions:
+              - TargetGroupArn: !Ref TargetGroupEC2
+                Type: forward
 Parameters:
+  ECSCluster:
+    Type: String
+    Description:  the name of the cluster for userdata
   org:
     Type: 'String'
-    Default: cb
+    Default: cloudbutton
     Description: organization
   environment:
     Type: String
-    Default: production
+    Default: prod
     Description: environment
   level:
     Type: String
     Default: benchmark
-    Description: level of difficulty
+    Description: Name of level used for naming convention
   InstanceType:
     Type: 'String'
     Default: t2.micro
     Description: instance size
   amiid:
-    Type: AWS::EC2::Image::Id
-    Default: ami-0d8e584a484d346ae
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ecs/optimized-ami/amazon-linux-2/recommended/image_id
     Description: ami id
   EbsOptimized:
     Type: String
@@ -214,7 +290,7 @@ Parameters:
     Description:  Ebs Optimized?
   vpcStack:
     Type: String
-    Default: beg
+    Default: bench
     Description:  which cf to link to
   LaunchTemplateVersion:
     Type: String
@@ -265,6 +341,38 @@ Outputs:
     ElasticLoadBalancerDNS:
       Description: Load balancer dns
       Value: !GetAtt ElasticLoadBalancer.DNSName
-
+      Export:
+        Name: !Join [ ":", [ !Ref "AWS::StackName", ElasticLoadBalancerDNS ] ]
+        Value: !GetAtt ElasticLoadBalancer.DNSName
+    FargateLink:
+      Description: link for fargate endpoint
+      Value: !Sub '${ElasticLoadBalancer.DNSName}/FG'
+    EC2Link:
+      Description: link for fargate endpoint
+      Value: !Sub '${ElasticLoadBalancer.DNSName}/EC2'
+    TargetGroupArnEC2:
+      Description: targetgroup arn
+      Value: !Ref TargetGroupEC2
+      Export:
+        Name: !Sub '${org}-${environment}-${level}:targetgroupec2'
+        Value: !Ref TargetGroupEC2
+    TargetGroupArnFARGATE:
+      Description: targetgroup arn
+      Value: !Ref TargetGroupFARGATE
+      Export:
+        Name: !Sub '${org}-${environment}-${level}:targetgroupfargate'
+        Value: !Ref TargetGroupFARGATE
+    SecurityGroupEC2:
+      Description: security group for containers
+      Value: !Ref EC2SecurityGroupEC2
+      Export:
+        Name: !Sub '${org}-${environment}-${level}:securitygroupec2'
+        Value: !Ref EC2SecurityGroupEC2
+    SecurityGroupFG:
+      Description: security group for containers
+      Value: !Ref EC2SecurityGroupFG
+      Export:
+        Name: !Sub '${org}-${environment}-${level}:securitygroupfg'
+        Value: !Ref EC2SecurityGroupFG
 
 
