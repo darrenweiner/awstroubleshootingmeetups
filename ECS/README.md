@@ -18,13 +18,13 @@ I acknowledge that AWS CloudFormation might require the following capability: CA
 
 |Module          | QuickLaunch |
 |----------------|--------------|
-|Benchmark| [![Launch Benchmark](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=ecs-meetup-benchmark&templateURL=https://cloudbutton-meetups.s3-us-west-2.amazonaws.com/VPC/CloudFormation/vpc_subnets_create_meetup-benchmark.yaml)|
-|Beginner| [![Launch Benchmark](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=ecs-meetup-beginner&templateURL=https://cloudbutton-meetups.s3-us-west-2.amazonaws.com/VPC/CloudFormation/vpc_subnets_create_beginner.yaml)|
-|Intermediate| [![Launch Benchmark](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=ecs-meetup-intermediate&templateURL=https://cloudbutton-meetups.s3-us-west-2.amazonaws.com/VPC/CloudFormation/vpc_subnets_create_intermediate.yaml)|
-|Advanced| [![Launch Benchmark](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=ecs-meetup-advanced&templateURL=https://cloudbutton-meetups.s3-us-west-2.amazonaws.com/VPC/CloudFormation/vpc_subnets_create_advanced.yaml)|
+|Benchmark| [![Launch Benchmark](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=ecs-meetup-benchmark&templateURL=https://cloudbutton-meetups.s3-us-west-2.amazonaws.com/VPC/CloudFormation/vpc_subnets_create_meetup-ecs-benchmark.yaml)|
+|Beginner| [![Launch Benchmark](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=ecs-meetup-beginner&templateURL=https://cloudbutton-meetups.s3-us-west-2.amazonaws.com/VPC/CloudFormation/vpc_subnets_create_meetup-ecs-beginner.yaml)|
+|Intermediate| [![Launch Benchmark](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=ecs-meetup-intermediate&templateURL=https://cloudbutton-meetups.s3-us-west-2.amazonaws.com/VPC/CloudFormation/vpc_subnets_create_meetup-ecs-intermediate.yaml)|
+|Advanced| [![Launch Benchmark](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=ecs-meetup-advanced&templateURL=https://cloudbutton-meetups.s3-us-west-2.amazonaws.com/VPC/CloudFormation/vpc_subnets_create_meetup-ecs-advanced.yaml)|
 
 
-Reference Architecture (Mostly complete)
+Reference Architecture (NEED TO REVISIT)
 
 ![Reference Architecture](https://cloudbutton-meetups.s3-us-west-2.amazonaws.com/RefArch/RefArch-VPCMeetup.jpeg)
 
