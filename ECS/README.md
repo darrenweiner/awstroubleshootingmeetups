@@ -6,7 +6,12 @@ Your goals are to successfully demonstrate the that:
 
 What you need to do:  
 * Launch either the beginner, intermediate, or advanced stack below. 
-* Once the stack is launched with all associated resources, begin troubleshooting and make whatever changes are needed to the resources to achieve the above goals.
+* Once the stack is launched and in a COMPLETE status:
+* Navigate to the ECS console.
+* Locate the relevant cluster: e.g. prod-cloudbutton-beginner 
+* update the service, setting number of tasks to 1
+* Click through the "Next Step" three times, then the "Update Service" button.
+* View the Service.  Once it shows the pending count of 1, you can begin troubleshooting and make whatever changes are needed to the resources to achieve the above goals.
 
 Notes:  
 WHEN LAUNCHING THESE VIA THE AWS CLOUDFORMATION CONSOLE USING THE BUTTONS PROVIDED BELOW:  
@@ -26,7 +31,7 @@ I acknowledge that AWS CloudFormation might require the following capability: CA
 
 Reference Architecture (NEED TO REVISIT)
 
-![Reference Architecture](https://cloudbutton-meetups.s3-us-west-2.amazonaws.com/RefArch/RefArch-VPCMeetup.jpeg)
+![Reference Architecture](https://cloudbutton-meetups.s3-us-west-2.amazonaws.com/RefArch/RefArch-ECSMeetup.jpg)
 
 
 FAQS:  
