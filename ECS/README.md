@@ -35,9 +35,10 @@ Reference Architecture (NEED TO REVISIT)
 
 
 FAQS:  
-REPLACE THIS QUESTION: What version of EC2 is being launched?  
-All modules are using launching a fairly recent version of the AWS provided base image of Amazon Linux 2: https://aws.amazon.com/marketplace/pp/B07PWHGXQG
-  
+What flavors of ECS are used in this workshop?
+The beginner and advanced challenges are FARGATE.
+The intermediate one is EC2-based in an Autoscale group with a launch template.
+
 Should I launch the benchmark stack?  
 No.  This is the 'correct' answer and is here as a reference.  But do not launch this one.  That's considered cheating.
 
@@ -57,6 +58,6 @@ If I figure out the beginner module, will that make it easier to figure out the 
 Probably not.  Each module is designed with different variations of incorrect or wrong configuration.
 
 How do I delete the stacks?  
-For most of the modules, when you delete the cloudformation stack, it will cleanly delete all the resources.  However, likely one of them will need some manual follow up.  
+For most of the modules, when you delete the cloudformation stack, it will cleanly delete all the resources.  However, some might need some manual clean up.  
 Instructions for this will follow at the end of the workshop.  Plan for some mop-up.
 
