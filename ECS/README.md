@@ -1,6 +1,6 @@
 ECS Troubleshooting Meetup  
 
-Your goals are to successfully demonstrate the that:  
+Your goals are to successfully demonstrate that:  
 * The website associated with the relevant target group displays correctly
 * The ECS Service is correctly logging to CloudWatch
 
