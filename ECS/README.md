@@ -29,7 +29,7 @@ I acknowledge that AWS CloudFormation might require the following capability: CA
 |Advanced| [![Launch Benchmark](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=ecs-meetup-advanced&templateURL=https://cloudbutton-meetups.s3-us-west-2.amazonaws.com/VPC/CloudFormation/vpc_subnets_create_meetup-ecs-advanced.yaml)|
 
 
-Reference Architecture (NEED TO REVISIT)
+Reference Architecture
 
 ![Reference Architecture](https://cloudbutton-meetups.s3-us-west-2.amazonaws.com/RefArch/RefArch-ECSMeetup.jpg)
 
