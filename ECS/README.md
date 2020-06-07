@@ -12,7 +12,15 @@ What you need to do:
 * update the service, setting number of tasks to 1
 * Click through the "Next Step" three times, then the "Update Service" button.
 * View the Service.  Once it shows the pending count of 1, you can begin troubleshooting and make whatever changes are needed to the resources to achieve the above goals.
+* To see if the website is displaying:
+* Navigate to the CloudFormation Service
+* Select the Nested Stack with the longest Name.  
+* Goto the Outputs Tab
+* Locate the EC2 or Fargate link and click on the value to see if the website is displaying correctly.
 
+To see if your container is logging correctly:
+Via the CloudWatch Service, goto the Log Groups Tab and search for to appropriate log group...e.g.
+/ecs/cloudbutton
 Notes:  
 WHEN LAUNCHING THESE VIA THE AWS CLOUDFORMATION CONSOLE USING THE BUTTONS PROVIDED BELOW:  
 Under 'Stack Creation Options', consider putting a timeout in of 15 minutes.  That will accelerate any troubleshooting if you run into problems.  

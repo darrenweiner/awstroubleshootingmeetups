@@ -6,7 +6,9 @@ Your goals are to successfully demonstrate the following:
 
 What you need to do:  
 * Launch either the beginner, intermediate, or advanced stack below. 
-* Once the stack is launched with all associated resources, begin troubleshooting and make whatever changes are needed to the resources to achieve the above goals.
+* Once the stack is launched with all associated resources:
+* Navigate to the Output tab of the NESTED cloudformation stack.  Click on the the DNS Value to launch that in a browser.  This is the URL that needs to respond with the Apache test page to complete that portion of the exercise.
+* Begin troubleshooting and make whatever changes are necessary to the resources to achieve the above two goals.
 
 Notes:  
 WHEN LAUNCHING THESE VIA THE AWS CLOUDFORMATION CONSOLE USING THE BUTTONS PROVIDED BELOW:  
