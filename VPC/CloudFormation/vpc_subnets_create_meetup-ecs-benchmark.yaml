@@ -267,7 +267,7 @@ Resources:
 Parameters:
   vpcStack:
     Type: String
-    Default: bench
+    Default: bench2
     Description: meetup level
   vpccidr:
     Type: String
