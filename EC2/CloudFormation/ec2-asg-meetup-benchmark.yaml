@@ -214,7 +214,7 @@ Parameters:
     Description:  Ebs Optimized?
   vpcStack:
     Type: String
-    Default: bench
+    Default: bench2
     Description:  which cf to link to
   LaunchTemplateVersion:
     Type: String

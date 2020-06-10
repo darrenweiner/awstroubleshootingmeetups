@@ -208,7 +208,7 @@ Parameters:
     Default: "183105093342.dkr.ecr.us-west-2.amazonaws.com/cloudbutton/meetup-nginx-sample:latest"
   vpcStack:
     Type: String
-    Default: bench
+    Default: bench2
     Description:  which cf to link to
   vpcid:
     Type: String
