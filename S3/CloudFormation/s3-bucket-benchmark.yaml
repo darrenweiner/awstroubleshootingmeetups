@@ -1,3 +1,9 @@
+VPC
+S3 Bucket
+uses vpcid as input to bucket name
+EC2 - deploys ECS/Autoscale group and load balancer
+ECS - deploys Cluster, Service, task definition
+
 Resources:
   S3ClientBucket:
     Type: 'AWS::S3::Bucket'
