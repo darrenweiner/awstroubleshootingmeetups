@@ -1,0 +1,94 @@
+
+Resources:
+  S3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref S3ClientBucket
+      PolicyDocument:
+        Statement:
+        - Sid: AWSGetBucketACL
+          Action: s3:GetBucketAcl
+          Effect: Allow
+          Principal:
+            Service: delivery.logs.amazonaws.com
+          Resource: !Sub 'arn:aws:s3:::${org}-${environment}-${bucketname}'
+        - Sid: AWSLogDeliveryWrite
+          Action: s3:PutObject
+          Effect: Allow
+          Principal:
+            Service: delivery.logs.amazonaws.com
+          Resource: !Sub 'arn:aws:s3:::${org}-${environment}-${bucketname}/AWSLogs/${AWS::AccountId}/*'
+          Condition:
+            StringEquals:
+              's3:x-amz-acl': bucket-owner-full-control
+        - Sid: AWSLoadBalancerWrite
+          Effect: Allow
+          Principal:
+            AWS: !Sub 'arn:aws:iam::${REGIONALAWSALBACCOUNTID}:root'
+          Action: s3:PutObject
+          Resource: !Sub 'arn:aws:s3:::${org}-${environment}-${bucketname}/ALBLogs/*'
+  S3ClientBucket:
+    Type: 'AWS::S3::Bucket'
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      PublicAccessBlockConfiguration:
+          BlockPublicAcls: True
+          BlockPublicPolicy: True
+          IgnorePublicAcls: True
+          RestrictPublicBuckets: True
+      AccessControl: LogDeliveryWrite
+      LifecycleConfiguration:
+        Rules:
+          - Id: all Previous and Current Versions
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 7
+            NoncurrentVersionTransitions:
+              - StorageClass: GLACIER
+                TransitionInDays: 10
+            NoncurrentVersionExpirationInDays: 30
+            Status: Enabled
+            ExpirationInDays: 90
+            Transitions:
+              - StorageClass: GLACIER
+                TransitionInDays: 30
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      BucketName: !Sub '${org}-${environment}-${bucketname}'
+      Tags:
+        - Key: environment
+          Value: !Ref environment
+        - Key: org
+          Value: !Ref org
+      VersioningConfiguration:
+        Status: Enabled
+  s3BucketloggingSSM:
+    Type: 'AWS::SSM::Parameter'
+    Properties:
+      Description: central logging bucket
+      Name: !Sub '/${org}/logbucket'
+      Type: String
+      Value: !Ref S3ClientBucket
+Outputs:
+  bucketname:
+    Description: Name of bucket
+    Value: !Ref S3ClientBucket
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", !Ref bucketname ] ]
+Parameters:
+  org:
+    Type: String
+    Default: cloudbutton
+  environment:
+    Type: String
+    Default: production
+  bucketname:
+    Type: String
+    Default: centrallogging
+    Description:  Core name of bucket
+  REGIONALAWSALBACCOUNTID:
+    Type: String
+    Default: 797873946194
+    Description: AWS Load Balancer service account id for region
